@@ -84,6 +84,19 @@ public class Grid
         return objects[x][y];
     }
     
+    public synchronized boolean move(Agent agent, Case c)
+    {
+        if(c.getAgent() == null)
+            return false;
+        
+        Case agentCase = getCase(agent);
+        
+        c.setAgent(agent);
+        agentCase.setAgent(null);
+        
+        return true;
+    }
+    
     public synchronized boolean dropObject(Agent agent)
     {
         if(agent.getCarriableObject() == null)
