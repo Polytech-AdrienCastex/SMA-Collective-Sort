@@ -5,14 +5,29 @@ import sma.model.CarriableObject;
 
 public class Case
 {
-    public Case()
+    public Case(int x, int y)
     {
         this.object = null;
         this.agent = null;
+        
+        this.x = x;
+        this.y = y;
     }
+    
+    private final int x;
+    private final int y;
     
     private CarriableObject object;
     private Agent agent;
+    
+    public int getX()
+    {
+        return x;
+    }
+    public int getY()
+    {
+        return y;
+    }
     
     protected void setObject(CarriableObject object)
     {
