@@ -1,6 +1,10 @@
 package sma.model;
 
-public class Agent
+public class Agent implements Runnable
 {
-    
+    @Override
+    public void run()
+    {
+        
+    }
 }
