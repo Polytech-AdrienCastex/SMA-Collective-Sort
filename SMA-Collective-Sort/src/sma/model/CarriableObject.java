@@ -3,5 +3,6 @@ package sma.model;
 public enum CarriableObject
 {
     A,
-    B
+    B,
+    EMPTY
 }
