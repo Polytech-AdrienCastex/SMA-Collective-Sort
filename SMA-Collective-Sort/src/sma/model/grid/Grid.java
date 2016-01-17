@@ -1,27 +1,16 @@
 package sma.model.grid;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import sma.model.Agent;
-import sma.model.CarriableObject;
+import sma.model.agent.Agent;
+import sma.model.object.CarriableObject;
 
 public class Grid
 {
-    public static Builder create()
-    {
-        return new Builder();
-    }
-    public static class Builder
-    {
-        
-        public Grid build()
-        {
-            return new Grid(5, 5);
-        }
-    }
-    
     public Grid(int width, int height)
     {
         this.height = height;
@@ -49,9 +38,21 @@ public class Grid
     
     public boolean isValidCoordinate(int x, int y)
     {
-        return x < 0 || y < 0 || x >= width || y >= height;
+        return x >= 0 && y >= 0 && x < width && y < height;
     }
     
+    public Case[] getLocalCasesArray(Agent agent)
+    {
+        Case c = getCase(agent);
+        
+        return new Case[]
+        {
+            getCase(c.getX() + 1, c.getY()),
+            getCase(c.getX(), c.getY() + 1),
+            getCase(c.getX() - 1, c.getY()),
+            getCase(c.getX(), c.getY() - 1)
+        };
+    }
     public Collection<Case> getLocalCases(Agent agent)
     {
         Case c = getCase(agent);
@@ -67,13 +68,33 @@ public class Grid
                 .collect(Collectors.toList());
     }
     
-    public Case getCase(Agent agent)
+    public Stream<Case> getAll()
     {
         return Stream.of(objects)
+                .flatMap(Stream::of);
+    }
+    public Stream<Case> getAllRandomlySorted()
+    {
+        Random rnd = new Random();
+        
+        Map<Case, Integer> is = Stream.of(objects)
                 .flatMap(Stream::of)
+                .collect(Collectors.toMap(c -> c, c -> rnd.nextInt()));
+        
+        return Stream.of(objects)
+                .flatMap(Stream::of)
+                .sorted((c1,c2) -> Integer.compare(is.get(c1), is.get(c2)));
+    }
+    
+    private Map<Agent, Case> agentToCase = new HashMap<>();
+    
+    public Case getCase(Agent agent)
+    {
+        return agentToCase.getOrDefault(agent, null);/*
+        return getAll()
                 .filter(c -> agent.equals(c.getAgent()))
                 .findFirst()
-                .orElse(null);
+                .orElse(null);*/
     }
     
     public Case getCase(int x, int y)
@@ -84,31 +105,38 @@ public class Grid
         return objects[x][y];
     }
     
-    public synchronized boolean move(Agent agent, Case c)
+    private static final Random rnd = new Random();
+    
+    public void initAgent(Case c, Agent a)
     {
-        if(c.getAgent() == null)
+        c.setAgent(a);
+        agentToCase.put(a, c);
+    }
+    
+    public boolean move(Agent agent, Case to)
+    {
+        if(to.containsAgent())
             return false;
         
-        Case agentCase = getCase(agent);
-        
-        c.setAgent(agent);
-        agentCase.setAgent(null);
+        getCase(agent).setAgent(null);
+        to.setAgent(agent);
+        agentToCase.put(agent, to);
         
         return true;
     }
     
-    public synchronized boolean dropObject(Agent agent)
+    public boolean dropObject(Agent agent)
     {
-        if(agent.getCarriableObject() == null)
+        CarriableObject obj = agent.getCarriableObject();
+        if(obj == null)
             return false;
         
-        CarriableObject obj = agent.getCarriableObject();
         getCase(agent).setObject(obj);
-        agent.setCarriableObject(obj);
+        agent.setCarriableObject(null);
         
         return true;
     }
-    public synchronized boolean takeObject(Agent agent)
+    public boolean takeObject(Agent agent)
     {
         if(agent.getCarriableObject() != null)
             return false;
@@ -124,5 +152,50 @@ public class Grid
         agent.setCarriableObject(obj);
         
         return true;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(" /");
+        for(int i = 0; i < width + 2; i++)
+            sb.append("-");
+        sb.append("\\");
+        sb.append("\n");
+        
+        for(int y = 0; y < height; y++)
+        {
+            sb.append(" | ");
+            for(int x = 0; x < width; x++)
+            {
+                Case c = getCase(x, y);
+                if(c.isEmpty())
+                    sb.append(" ");
+                else if(c.containsAgent())
+                {
+                    CarriableObject o = c.getAgent().getCarriableObject();
+                    if(o == CarriableObject.A)
+                        sb.append("a");
+                    else if(o == CarriableObject.B)
+                        sb.append("b");
+                    else
+                        sb.append("*");
+                }
+                else if(c.containsObject())
+                    sb.append(c.getObject().equals(CarriableObject.A) ? "A" : "B");
+            }
+            sb.append(" |");
+            sb.append("\n");
+        }
+        
+        sb.append(" \\");
+        for(int i = 0; i < width + 2; i++)
+            sb.append("-");
+        sb.append("/");
+        sb.append("\n");
+        
+        return sb.toString();
     }
 }

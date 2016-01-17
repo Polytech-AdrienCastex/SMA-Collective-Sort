@@ -1,7 +1,7 @@
 package sma.model.grid;
 
-import sma.model.Agent;
-import sma.model.CarriableObject;
+import sma.model.object.CarriableObject;
+import sma.model.agent.Agent;
 
 public class Case
 {
@@ -18,7 +18,6 @@ public class Case
     private final int y;
     
     private CarriableObject object;
-    private Agent agent;
     
     public int getX()
     {
@@ -29,21 +28,44 @@ public class Case
         return y;
     }
     
-    protected void setObject(CarriableObject object)
+    public void setObject(CarriableObject object)
     {
         this.object = object;
     }
-    public CarriableObject getObject()
+    public <T extends CarriableObject> T getObject()
     {
-        return object;
+        return (T)object;
     }
     
-    public Agent getAgent()
-    {
-        return agent;
-    }
+    private Agent agent;
     protected void setAgent(Agent agent)
     {
         this.agent = agent;
+    }
+    public <T extends Agent> T getAgent()
+    {
+        return (T)agent;
+    }
+    
+    public boolean containsAgent()
+    {
+        return agent != null;
+    }
+    public boolean containsObject()
+    {
+        return object != null;
+    }
+    
+    public boolean contains(Class c)
+    {
+        if(isEmpty())
+            return false;
+        
+        return c.isInstance(object) || c.isInstance(agent);
+    }
+    
+    public boolean isEmpty()
+    {
+        return !containsAgent() && !containsObject();
     }
 }
