@@ -1,6 +1,7 @@
 package sma.controller;
 
 import java.io.IOException;
+import java.util.Scanner;
 import sma.model.agent.AgentParameterSet;
 
 public class Main
@@ -8,7 +9,13 @@ public class Main
 
     public static void main(String[] arg) throws IOException, InterruptedException
     {
-        boolean multiThreading = true;
+        System.out.println("Multithread? [y/n]");
+        Scanner scan = new Scanner(System.in);
+        String in = scan.next().toLowerCase().trim();
+        
+        boolean multiThreading = in.equals("y") || in.equals("ye") || in.equals("yes");
+        System.out.println("Multithreading : " + multiThreading);
+        
         int nbAgents = 20;
         int nbObjects = 200;
         int w = 50;

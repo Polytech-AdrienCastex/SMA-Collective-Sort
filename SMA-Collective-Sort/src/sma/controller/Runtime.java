@@ -57,7 +57,7 @@ public class Runtime implements Runnable
                     .forEach(c -> grid.initAgent(c, agsClone.remove(0)));
 
             System.out.println(grid);
-            System.out.println("Press a key...");
+            System.out.println("Press Enter key...");
             System.in.read();
             for(int i = 0; i < System.in.available(); i++)
                 System.in.read();
@@ -82,7 +82,7 @@ public class Runtime implements Runnable
 
                 System.out.println(grid);
 
-                System.out.print("Press a key for pause...");
+                System.out.print("Press Enter key for pause...");
                 if(!multiThreading)
                     System.out.print(" [it_skip = " + xnb + "]");
                 System.out.println();
